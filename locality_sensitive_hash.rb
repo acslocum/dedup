@@ -4,7 +4,7 @@ class LocalitySensitiveHash
   
   def initialize bucket_count
     @bucket_count = bucket_count
-    @hash_function = HashFunction.new
+    @hash_function = HashFunction.new(3,@bucket_count)
     @buckets = {}
   end
   
@@ -20,7 +20,7 @@ class LocalitySensitiveHash
   end
   
   def hashed? string_array
-    false
+    include? @hash_function.hash string_array
   end
   
   def keys
