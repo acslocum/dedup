@@ -35,7 +35,7 @@ describe LocalitySensitiveHash do
   end
   
   context "put" do
-    it "allows multiple identical values to be added, creating multple entries" do
+    it "allows multiple identical values to be added, creating two entries" do
       lsh.put input
       lsh.put input
       lsh.size.should eq(2)
@@ -43,24 +43,44 @@ describe LocalitySensitiveHash do
   end
   
   context "size" do
-    it "verifies that an entry has been added" do
+    it "verifies that an entry increases size by one" do
       lsh.size.should eq(0)
       lsh.put input
       lsh.size.should eq(1)
     end
+    
+    it "reports that two entries have been added" do
+      lsh.put input
+      lsh.put(input.clone << "x")
+      lsh.size.should eq(2)
+    end
   end
   
   context "neighbor_histogram" do
-    context "provides a map of value to number of buckets that value shares with the target" do
-      it "for the case where the map is empty" do
+    context "provides a map of the number of buckets that a given value shares with the input string" do
+      context "when there is a single hash function" do
+       it "for the case where the map is empty" do
         histogram = lsh.neighbor_histogram input
         histogram.should be_empty
       end
       
-      it "equals the number of buckets when only one value has been hashed" do
+      it "equals one entry with the input itself when only one value has been hashed" do
         lsh.put input
         histogram = lsh.neighbor_histogram input
-        histogram[input].should eq(5)
+        histogram[input].should eq(1)
+      end
+
+      it "equals the number of buckets when two values have been hashed to a one-bucket hash" do
+        single_lsh = LocalitySensitiveHash(1)
+        lsh.put input
+        second_input = input << "x"
+        lsh.put second_input
+        histoxgram = lsh.neighbor_histogram input
+        histogram[input].should eq({input => 1, second_input => 1})
+      end
+      end
+      context "multiple hash functions" do
+        
       end
     end
   end

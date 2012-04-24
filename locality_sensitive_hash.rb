@@ -4,13 +4,13 @@ class LocalitySensitiveHash
   
   def initialize bucket_count
     @bucket_count = bucket_count
-    @hash_function = HashFunction.new(3,@bucket_count)
+    @hash_function = HashFunction.new(57,@bucket_count)
     @buckets = {}
   end
   
   def put string_array
     key = @hash_function.hash string_array
-    @buckets[key] = [] if !@buckets.include? key
+    @buckets[key] = [] if !include? key
     @buckets[key] << string_array
     key
   end
@@ -45,7 +45,9 @@ class LocalitySensitiveHash
   end
   
   def size
-    @buckets.size
+    total=0
+    @buckets.keys.each { |key| total += @buckets[key].size}
+    total
   end
   
 end
