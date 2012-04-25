@@ -7,13 +7,13 @@ class LocalitySensitiveHash
     @hash_function = []
     @buckets = []
     hash_function_count.times do
-      @hash_function << HashFunction.new(20001,@bucket_count)
+      @hash_function << HashFunction.new(20001)
       @buckets << {}
     end
   end
   
   def put string_array
-    key = @hash_function[0].hash string_array
+    key = hash string_array
     @buckets[0][key] = [] if !include? key
     @buckets[0][key] << string_array
     key
@@ -24,7 +24,11 @@ class LocalitySensitiveHash
   end
   
   def hashed? string_array
-    include? @hash_function[0].hash string_array
+    include? hash(string_array)
+  end
+  
+  def hash string_array
+    @hash_function[0].hash(string_array) % @bucket_count
   end
   
   def keys
@@ -36,7 +40,7 @@ class LocalitySensitiveHash
   end
   
   def buckets_for string_array
-    key = @hash_function[0].hash string_array
+    key = hash(string_array)
     self[key]
   end
   

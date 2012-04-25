@@ -1,7 +1,6 @@
 class HashFunction
-  def initialize(val, mod)
+  def initialize(val)
     @val = val
-    @mod = mod
   end
   
   def hash(string_array)
@@ -11,7 +10,7 @@ class HashFunction
         total += @val*byte
       end
     end
-    total % @mod
+    total
   end
   
 end

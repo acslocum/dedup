@@ -123,4 +123,14 @@ describe LocalitySensitiveHash do
       lsh.values.should eq([[input]])
     end
   end
+  
+  context "hash" do
+    it "produces a hash constrained by the number of buckets" do
+      lsh = LocalitySensitiveHash.new(:bucket_count => 10)
+      30.times do |i|
+        (lsh.hash(i.to_s) < 10).should eq(true)
+      end
+    end
+    
+  end
 end
