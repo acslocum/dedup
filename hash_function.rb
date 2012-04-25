@@ -1,6 +1,7 @@
 class HashFunction
   def initialize(val)
     @val = val
+    generate_hash_array(val)
   end
   
   def hash(string_array)
@@ -11,6 +12,14 @@ class HashFunction
       end
     end
     total
+  end
+  
+  def generate_hash_array(seed)
+    
+  end
+  
+  def function
+    []
   end
   
 end
