@@ -1,52 +1,67 @@
 class LocalitySensitiveHash
   attr_reader :bucket_count
   
-  
-  def initialize bucket_count
-    @bucket_count = bucket_count
-    @hash_function = HashFunction.new(57,@bucket_count)
-    @buckets = {}
+  def initialize options
+    @bucket_count = options[:bucket_count] || 10000
+    hash_function_count = options[:hash_function_count] || 1
+    @hash_function = []
+    @buckets = []
+    hash_function_count.times do
+      @hash_function << HashFunction.new(20001,@bucket_count)
+      @buckets << {}
+    end
   end
   
   def put string_array
-    key = @hash_function.hash string_array
-    @buckets[key] = [] if !include? key
-    @buckets[key] << string_array
+    key = @hash_function[0].hash string_array
+    @buckets[0][key] = [] if !include? key
+    @buckets[0][key] << string_array
     key
   end
   
   def include? key
-    @buckets.include? key
+    @buckets[0].include? key
   end
   
   def hashed? string_array
-    include? @hash_function.hash string_array
+    include? @hash_function[0].hash string_array
   end
   
   def keys
-    @buckets.keys
+    @buckets[0].keys
   end
   
   def values
-    @buckets.values
+    @buckets[0].values
   end
   
   def buckets_for string_array
-    key = @hash_function.hash string_array
-    [@buckets[key]]
+    key = @hash_function[0].hash string_array
+    self[key]
   end
   
   def [] key
-    @buckets[key]
+    @buckets[0][key]
   end
   
   def neighbor_histogram string_array
-    []
+    buckets = buckets_for string_array
+    histogram = {}
+    if !buckets.nil?
+      buckets.each do |entry|
+        if(histogram.include? entry)
+          histogram[entry] = histogram[entry]+1
+        else
+          histogram[entry] = 1
+        end
+      end
+    end
+    histogram
   end
   
   def size
     total=0
-    @buckets.keys.each { |key| total += @buckets[key].size}
+    @buckets[0].keys.each { |key| total += @buckets[0][key].size }
     total
   end
   

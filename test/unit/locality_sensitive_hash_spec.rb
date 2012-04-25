@@ -1,8 +1,9 @@
 require 'locality_sensitive_hash'
 
 describe LocalitySensitiveHash do
-  let(:lsh) {LocalitySensitiveHash.new 10}
+  let(:lsh) {LocalitySensitiveHash.new :bucket_count => 10}
   let(:input) {["some","string array"]}
+  let(:input_2) {["some","string array", "2"]}
   
     context "hashed?" do
       it "contains an entry if it has been added" do
@@ -51,7 +52,7 @@ describe LocalitySensitiveHash do
     
     it "reports that two entries have been added" do
       lsh.put input
-      lsh.put(input.clone << "x")
+      lsh.put(input_2)
       lsh.size.should eq(2)
     end
   end
@@ -59,35 +60,52 @@ describe LocalitySensitiveHash do
   context "neighbor_histogram" do
     context "provides a map of the number of buckets that a given value shares with the input string" do
       context "when there is a single hash function" do
-       it "for the case where the map is empty" do
-        histogram = lsh.neighbor_histogram input
-        histogram.should be_empty
-      end
+        it "for the case where the map is empty" do
+          histogram = lsh.neighbor_histogram input
+          histogram.should be_empty
+        end
       
-      it "equals one entry with the input itself when only one value has been hashed" do
-        lsh.put input
-        histogram = lsh.neighbor_histogram input
-        histogram[input].should eq(1)
-      end
+        it "equals one entry with the input itself when only one value has been hashed" do
+          lsh.put input
+          histogram = lsh.neighbor_histogram input
+          histogram[input].should eq(1)
+        end
 
-      it "equals the number of buckets when two values have been hashed to a one-bucket hash" do
-        single_lsh = LocalitySensitiveHash(1)
-        lsh.put input
-        second_input = input << "x"
-        lsh.put second_input
-        histoxgram = lsh.neighbor_histogram input
-        histogram[input].should eq({input => 1, second_input => 1})
-      end
+        it "equals the number of buckets when two values have been hashed to a one-bucket hash" do
+          single_lsh = LocalitySensitiveHash.new({:bucket_count => 1})
+          single_lsh.put input
+          second_input = input_2
+          single_lsh.put second_input
+          histogram = single_lsh.neighbor_histogram input
+          histogram.should eq({input => 1, second_input => 1})
+        end
+        
+        it "excludes values that are not in the same bucket" do
+          dual_lsh = LocalitySensitiveHash.new({:bucket_count => 2})
+          dual_lsh.put ["1"]
+          dual_lsh.put ["2"]
+          dual_lsh.put ["3"]
+          dual_lsh.put ["3"]
+          dual_lsh.put ["4"]
+          histogram = dual_lsh.neighbor_histogram ["1"]
+          histogram.should eq({["1"] => 1, ["3"] => 2})
+          dual_lsh.size.should eq(5)
+        end
       end
       context "multiple hash functions" do
-        
+        it "counts a single entry as many times as it shows up across all hashes" do
+          multiple_lsh = LocalitySensitiveHash.new({:bucket_count => 1, :hash_function_count => 5})
+          multiple_lsh.put input
+          histogram = multiple_lsh.neighbor_histogram input
+          histogram[input].should eq(5)
+        end
       end
     end
   end
   
   context "bucket_count" do
     it "reflects the number of buckets desired" do
-      lsh = LocalitySensitiveHash.new 5
+      lsh = LocalitySensitiveHash.new :bucket_count => 5
       lsh.bucket_count.should eq(5)
     end
   end
