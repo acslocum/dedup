@@ -4,48 +4,23 @@ class LocalitySensitiveHash
   def initialize options
     @bucket_count = options[:bucket_count] || 10000
     hash_function_count = options[:hash_function_count] || 1
-    @hash_function = []
-    @buckets = []
+    @hash_tables = []
     hash_function_count.times do
-      @hash_function << HashFunction.new(20001)
-      @buckets << {}
+      @hash_tables << HashTable.new(20001, @bucket_count)
     end
   end
   
   def put string_array
-    key = hash string_array
-    @buckets[0][key] = [] if !include? key
-    @buckets[0][key] << string_array
-    key
-  end
-  
-  def include? key
-    @buckets[0].include? key
+    @hash_tables.each {|table| table.put string_array}
+    nil
   end
   
   def hashed? string_array
-    include? hash(string_array)
-  end
-  
-  def hash string_array
-    @hash_function[0].hash(string_array) % @bucket_count
-  end
-  
-  def keys
-    @buckets[0].keys
-  end
-  
-  def values
-    @buckets[0].values
+    @hash_tables[0].hashed? string_array
   end
   
   def buckets_for string_array
-    key = hash(string_array)
-    self[key]
-  end
-  
-  def [] key
-    @buckets[0][key]
+    @hash_tables.collect { |table| table.bucket_for(string_array)}
   end
   
   def neighbor_histogram string_array
@@ -64,9 +39,7 @@ class LocalitySensitiveHash
   end
   
   def size
-    total=0
-    @buckets[0].keys.each { |key| total += @buckets[0][key].size }
-    total
+    @hash_tables[0].size
   end
   
 end

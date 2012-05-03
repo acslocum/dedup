@@ -5,36 +5,17 @@ describe LocalitySensitiveHash do
   let(:input) {["some","string array"]}
   let(:input_2) {["some","string array", "2"]}
   
-    context "hashed?" do
-      it "contains an entry if it has been added" do
-        lsh.put input
-        lsh.hashed?(input).should eq(true)
-      end
-
-      it "does not contain an entry if it has not been added" do
-        lsh.hashed?(input).should eq(false)
-      end
+  context "hashed?" do
+    it "contains an entry if it has been added" do
+      lsh.put input
+      lsh.hashed?(input).should eq(true)
     end
 
-    context "include?" do
-      it "contains a key if it something has been hashed to it" do
-        key = lsh.put input
-        lsh.include?(key).should eq(true)
-      end
-
-      it "does not contain a key if it has not been added" do
-        lsh.include?(1234).should eq(false)
-      end
-    end
-
-  context "[]" do
-    it "allows retrieval of bucket contents by passing in a valid key" do
-      key = lsh.put input
-      bucket = lsh[key]
-      bucket.should eq([input])
+    it "does not contain an entry if it has not been added" do
+      lsh.hashed?(input).should eq(false)
     end
   end
-  
+
   context "put" do
     it "allows multiple identical values to be added, creating two entries" do
       lsh.put input
@@ -62,6 +43,7 @@ describe LocalitySensitiveHash do
       context "when there is a single hash function" do
         it "for the case where the map is empty" do
           histogram = lsh.neighbor_histogram input
+          histogram.should eq({})
           histogram.should be_empty
         end
       
